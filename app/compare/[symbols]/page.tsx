@@ -26,7 +26,7 @@ export async function generateStaticParams() {
 export const revalidate = 86400; // Daily Revalidation
 
 export async function generateMetadata({ params }: { params: { symbols: string } }): Promise<Metadata> {
-    const [symA, _, symB] = params.symbols.split('-');
+    const [symA, _, symB] = (params?.symbols || '').split('-');
 
     return {
         title: `${symA.toUpperCase()} vs ${symB.toUpperCase()} - Stock Comparison & Forecast | QuantHub`,
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: { symbols: string }
 }
 
 export default async function ComparePage({ params }: { params: { symbols: string } }) {
-    const [rawA, _, rawB] = params.symbols.split('-');
+    const [rawA, _, rawB] = (params?.symbols || '').split('-');
     const symA = rawA.toUpperCase();
     const symB = rawB.toUpperCase();
 
