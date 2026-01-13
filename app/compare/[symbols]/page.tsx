@@ -26,7 +26,11 @@ export async function generateStaticParams() {
 export const revalidate = 86400; // Daily Revalidation
 
 export async function generateMetadata({ params }: { params: { symbols: string } }): Promise<Metadata> {
-    const [symA, _, symB] = (params?.symbols || '').split('-');
+    const parts = (params?.symbols || '').split('-');
+    if (parts.length < 3) return { title: 'Comparison' };
+
+    const symA = parts[0] || 'A';
+    const symB = parts[2] || 'B';
 
     return {
         title: `${symA.toUpperCase()} vs ${symB.toUpperCase()} - Stock Comparison & Forecast | QuantHub`,
@@ -35,9 +39,15 @@ export async function generateMetadata({ params }: { params: { symbols: string }
 }
 
 export default async function ComparePage({ params }: { params: { symbols: string } }) {
-    const [rawA, _, rawB] = (params?.symbols || '').split('-');
-    const symA = rawA.toUpperCase();
-    const symB = rawB.toUpperCase();
+    const parts = (params?.symbols || '').split('-');
+
+    // Fallback if URL is malformed
+    if (parts.length < 3) {
+        return <div className="p-20 text-center text-white">Invalid comparison URL. Try <Link href="/stocks" className="text-blue-400">Search</Link></div>;
+    }
+
+    const symA = (parts[0] || '').toUpperCase();
+    const symB = (parts[2] || '').toUpperCase();
 
     const [stockA, stockB] = await Promise.all([
         getStockData(symA),
