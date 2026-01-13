@@ -5,16 +5,26 @@ import { supabase } from "@/lib/supabase";
 const BASE_URL = 'https://quanthub.com';
 
 export async function generateSitemaps() {
-    // Logic to split sitemap. 
-    // We fetch count of tickers and divide by 10,000 (safe limit per file)
-    const { count } = await supabase.from('tickers').select('*', { count: 'exact', head: true });
-    const total = count || 0;
+    try {
+        // Logic to split sitemap. 
+        // We fetch count of tickers and divide by 10,000 (safe limit per file)
+        const { count, error } = await supabase.from('tickers').select('*', { count: 'exact', head: true });
 
-    // Example: If 20,000 tickers, we need 2 chunks + 1 for basics + more for comparisons
-    // We return IDs: 0, 1, 2...
-    // Smaller chunks because we add compare links (approx 4x URL density now)
-    const chunks = Math.ceil(total / 2000);
-    return Array.from({ length: chunks }, (_, i) => ({ id: i }));
+        if (error) throw error;
+
+        const total = count || 0;
+
+        // Example: If 20,000 tickers, we need 2 chunks + 1 for basics + more for comparisons
+        // We return IDs: 0, 1, 2...
+        // Smaller chunks because we add compare links (approx 4x URL density now)
+        // Ensure at least 1 chunk exists so static routes (id:0) are always generated
+        const chunks = Math.max(1, Math.ceil(total / 2000));
+        return Array.from({ length: chunks }, (_, i) => ({ id: i }));
+    } catch (e) {
+        console.error('Sitemap generation failed:', e);
+        // Fallback: generate at least the main sitemap with static routes
+        return [{ id: 0 }];
+    }
 }
 
 export default async function sitemap({ id }: { id: number }): Promise<MetadataRoute.Sitemap> {
