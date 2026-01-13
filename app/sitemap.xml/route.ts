@@ -1,5 +1,7 @@
 export const runtime = "nodejs";
 
+import { supabase } from "@/lib/supabase";
+
 function xmlEscape(s: string) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -14,10 +16,16 @@ function getBaseUrl(req: Request) {
 
 export async function GET(req: Request) {
     const baseUrl = getBaseUrl(req);
+    const CHUNK_SIZE = 5000;
 
-    // TODO: 실제 chunkCount를 Supabase tickers 개수 기반으로 계산하도록 연결
-    // 임시로 20개 chunk로 잡아도 되고, 이후 자동 계산으로 교체해라.
-    const chunkCount = 20;
+    // tickers 테이블의 전체 개수를 조회해 chunkCount 계산
+    const { count } = await supabase
+        .from("tickers")
+        .select("*", { count: "exact", head: true });
+
+    const total = count || 0;
+    // 최소 1개는 있어야 sitemap/0.xml 이 생성됨
+    const chunkCount = Math.max(1, Math.ceil(total / CHUNK_SIZE));
 
     const body =
         `<?xml version="1.0" encoding="UTF-8"?>\n` +
@@ -29,5 +37,10 @@ export async function GET(req: Request) {
 
     return new Response(body, {
         headers: { "Content-Type": "application/xml; charset=utf-8" },
+        // 1시간 캐시
+        // headers: { 
+        //   "Content-Type": "application/xml; charset=utf-8",
+        //   "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=59"
+        // },
     });
 }
