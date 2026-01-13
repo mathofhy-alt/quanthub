@@ -25,8 +25,9 @@ export async function generateStaticParams() {
 
 export const revalidate = 86400; // Daily Revalidation
 
-export async function generateMetadata({ params }: { params: { symbols: string } }): Promise<Metadata> {
-    const parts = (params?.symbols || '').split('-');
+export async function generateMetadata({ params }: { params: Promise<{ symbols: string }> }): Promise<Metadata> {
+    const { symbols } = await params;
+    const parts = (symbols || '').split('-');
     if (parts.length < 3) return { title: 'Comparison' };
 
     const symA = parts[0] || 'A';
@@ -38,8 +39,9 @@ export async function generateMetadata({ params }: { params: { symbols: string }
     };
 }
 
-export default async function ComparePage({ params }: { params: { symbols: string } }) {
-    const parts = (params?.symbols || '').split('-');
+export default async function ComparePage({ params }: { params: Promise<{ symbols: string }> }) {
+    const { symbols } = await params;
+    const parts = (symbols || '').split('-');
 
     // Fallback if URL is malformed
     if (parts.length < 3) {

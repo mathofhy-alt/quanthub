@@ -3,8 +3,9 @@ import { formatCurrency } from "@/lib/utils";
 import { AdUnit } from "@/components/ads/AdUnit";
 import { ArrowUp, ArrowDown } from "lucide-react";
 
-export async function generateMetadata({ params }: { params: { symbol: string } }) {
-    const stock = await getStockData(params.symbol);
+export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }) {
+    const { symbol } = await params;
+    const stock = await getStockData(symbol);
     if (!stock) return { title: 'Stock Not Found' };
 
     return {
@@ -13,8 +14,9 @@ export async function generateMetadata({ params }: { params: { symbol: string } 
     };
 }
 
-export default async function StockPage({ params }: { params: { symbol: string } }) {
-    const stock = await getStockData(params.symbol);
+export default async function StockPage({ params }: { params: Promise<{ symbol: string }> }) {
+    const { symbol } = await params;
+    const stock = await getStockData(symbol);
 
     if (!stock) {
         return <div className="p-20 text-center text-white">Stock not found</div>;

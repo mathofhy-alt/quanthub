@@ -14,8 +14,9 @@ export async function generateStaticParams() {
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: { symbol: string } }): Promise<Metadata> {
-    const symbol = params.symbol.toUpperCase();
+export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }): Promise<Metadata> {
+    const { symbol: _symbol } = await params;
+    const symbol = _symbol.toUpperCase();
     const stock = await getStockData(symbol);
 
     if (!stock) return { title: 'Calculator Not Found' };
@@ -26,8 +27,9 @@ export async function generateMetadata({ params }: { params: { symbol: string } 
     };
 }
 
-export default async function CompoundTickerPage({ params }: { params: { symbol: string } }) {
-    const symbol = params.symbol.toUpperCase();
+export default async function CompoundTickerPage({ params }: { params: Promise<{ symbol: string }> }) {
+    const { symbol: _symbol } = await params;
+    const symbol = _symbol.toUpperCase();
     const stock = await getStockData(symbol);
 
     if (!stock) {
