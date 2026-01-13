@@ -69,7 +69,7 @@ export default async function CompoundTickerPage({ params }: { params: { symbol:
                         const fv = initial * Math.pow(1.08, yrs) + (monthly * 12 * (Math.pow(1.08, yrs) - 1) / 0.08);
                         return (
                             <div key={yrs} className="bg-slate-950 p-6 rounded-lg border border-slate-800">
-                                <div className="text-emerald-500 font-bold text-2xl mb-2">{formatCurrency(fv).split('.')[0]}</div>
+                                <div className="text-emerald-500 font-bold text-2xl mb-2">{(formatCurrency(fv) || '$0').split('.')[0]}</div>
                                 <div className="text-slate-500 text-sm">After {yrs} Years</div>
                             </div>
                         )
